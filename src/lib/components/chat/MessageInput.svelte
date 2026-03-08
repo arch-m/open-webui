@@ -84,6 +84,7 @@
 	import Voice from '../icons/Voice.svelte';
 	import Cloud from '../icons/Cloud.svelte';
 	import IntegrationsMenu from './MessageInput/IntegrationsMenu.svelte';
+	import ReasoningMenu from './MessageInput/ReasoningMenu.svelte';
 	import TerminalMenu from './MessageInput/TerminalMenu.svelte';
 	import Component from '../icons/Component.svelte';
 	import PlusAlt from '../icons/PlusAlt.svelte';
@@ -117,12 +118,22 @@
 	export let selectedModels: [''];
 
 	let selectedModelIds = [];
+	let selectedModel: Model | null = null;
+	let canShowReasoningMenu = false;
 	$: selectedModelIds = atSelectedModel !== undefined ? [atSelectedModel.id] : selectedModels;
+	$: selectedModel =
+		selectedModelIds.length === 1 ? $models.find((m) => m.id === selectedModelIds[0]) ?? null : null;
+	$: canShowReasoningMenu =
+		selectedModelIds.length === 1 &&
+		selectedModel !== null &&
+		($_user?.role === 'admin' ||
+			(($_user?.permissions?.chat?.controls ?? true) && ($_user?.permissions?.chat?.params ?? true)));
 
 	export let history;
 	export let taskIds = null;
 
 	export let prompt = '';
+	export let params = {};
 	export let files = [];
 
 	export let selectedToolIds = [];
@@ -1620,28 +1631,41 @@
 												<Component className="size-4.5" strokeWidth="1.5" />
 											</div>
 										</IntegrationsMenu>
-									{/if}
+										{/if}
 
-									{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
+										{#if canShowReasoningMenu}
+											<ReasoningMenu
+												bind:params
+												{selectedModel}
+												onClose={async () => {
+													await tick();
+
+													const chatInput = document.getElementById('chat-input');
+													chatInput?.focus();
+												}}
+											/>
+										{/if}
+
+										{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
+											<div class="ml-1 flex gap-1.5">
+												<Tooltip content={$i18n.t('Valves')} placement="top">
+													<button
+														type="button"
+														id="model-valves-button"
+														class="bg-transparent hover:bg-gray-100 text-gray-700 dark:text-white dark:hover:bg-gray-800 rounded-full size-8 flex justify-center items-center outline-hidden focus:outline-hidden"
+														on:click={() => {
+															selectedValvesType = 'function';
+															selectedValvesItemId = selectedModelIds[0]?.split('.')[0];
+															showValvesModal = true;
+														}}
+													>
+														<Knobs className="size-4" strokeWidth="1.5" />
+													</button>
+												</Tooltip>
+											</div>
+										{/if}
+
 										<div class="ml-1 flex gap-1.5">
-											<Tooltip content={$i18n.t('Valves')} placement="top">
-												<button
-													type="button"
-													id="model-valves-button"
-													class="bg-transparent hover:bg-gray-100 text-gray-700 dark:text-white dark:hover:bg-gray-800 rounded-full size-8 flex justify-center items-center outline-hidden focus:outline-hidden"
-													on:click={() => {
-														selectedValvesType = 'function';
-														selectedValvesItemId = selectedModelIds[0]?.split('.')[0];
-														showValvesModal = true;
-													}}
-												>
-													<Knobs className="size-4" strokeWidth="1.5" />
-												</button>
-											</Tooltip>
-										</div>
-									{/if}
-
-									<div class="ml-1 flex gap-1.5">
 										{#if (selectedToolIds ?? []).length > 0}
 											<Tooltip
 												content={$i18n.t('{{COUNT}} Available Tools', {

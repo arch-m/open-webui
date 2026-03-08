@@ -2799,6 +2799,7 @@
 									{history}
 									{taskIds}
 									{selectedModels}
+									bind:params
 									bind:files
 									bind:prompt
 									bind:autoScroll

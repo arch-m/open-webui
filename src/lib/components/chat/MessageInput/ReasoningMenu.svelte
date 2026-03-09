@@ -80,6 +80,18 @@
 
 		return '';
 	})();
+
+	$: bulbToneClass = (() => {
+		if (isOllamaModel && params?.think === true) {
+			return 'text-emerald-600 dark:text-emerald-400';
+		}
+
+		if (isOllamaModel && params?.think === false) {
+			return 'text-red-600 dark:text-red-400';
+		}
+
+		return '';
+	})();
 </script>
 
 <div class="ml-1 flex gap-1.5">
@@ -101,7 +113,7 @@
 					: 'p-2 opacity-70 text-gray-700 dark:text-white'}"
 				aria-label={$i18n.t('Reasoning')}
 			>
-				<LightBulb className="size-4" strokeWidth="1.75" />
+				<LightBulb className={`size-4 ${bulbToneClass}`.trim()} strokeWidth="1.75" />
 
 				{#if buttonLabel !== ''}
 					<span class="truncate text-[13px] max-w-[100px]">{buttonLabel}</span>

@@ -115,10 +115,12 @@
 			>
 				<LightBulb className={`size-4 ${bulbToneClass}`.trim()} strokeWidth="1.75" />
 
-				{#if buttonLabel !== ''}
-					<span class="truncate text-[13px] max-w-[100px]">{buttonLabel}</span>
-				{/if}
-			</button>
+					{#if buttonLabel !== ''}
+						<span class="truncate text-[13px] max-w-[100px] text-gray-700 dark:text-white">
+							{buttonLabel}
+						</span>
+					{/if}
+				</button>
 		</Tooltip>
 
 		<div slot="content">
